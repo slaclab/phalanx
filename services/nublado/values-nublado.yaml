@@ -1,4 +1,8 @@
 nublado:
+
+  imagePullSecrets:
+    name: 'pull-secret'
+
   fqdn: nublado.lsst.codes
 
   oauth_provider: 'jwt'
