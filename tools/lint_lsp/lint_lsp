@@ -1,0 +1,127 @@
+#!/bin/sh
+
+set -e
+trap 'catch $? $LINENO' EXIT
+
+catch() {
+    if [ $1 -ne 0 ]; then
+	echo 1>&2 "Error $1 at $0:$2"
+	# If we've generated some YAML, say where.
+	if [ -n "$outdir" ]; then
+	    echo 1>&2 "Working files are in ${outdir}"
+	fi
+    fi
+}
+
+usage() {
+    echo 1>&2 "Usage: $0 chartdir lsp-deploydir environ"
+}
+
+chartdir=$1
+if [ -z "${chartdir}" ]; then
+    usage
+    exit 1
+fi
+
+lsp_deploydir=$2
+if [ -z "${lsp_deploydir}" ]; then
+    usage
+    exit 1
+fi
+
+environ=$3
+if [ -z "${environ}" ]; then
+    usage
+    exit 1
+fi
+
+if [ ! -d ${chartdir}/charts ]; then
+    echo 1>&2 "${chartdir} is not a charts repository directory."
+    exit 2
+fi
+
+if [ ! -d ${lsp_deploydir}/services ] || \
+       [ ! -d ${lsp_deploydir}/installer ]; then
+    echo 1>&2 "${lsp_deploydir} is not an lsp-deploy repository directory."
+    exit 2
+fi
+
+vfiles=$(find ${lsp_deploydir} -name values-${environ}.yaml)
+
+if [ -z "${vfiles}" ]; then
+    echo 1>&2 "No values files for environment ${environ}."
+    exit 3
+fi
+
+cwd=$(pwd)
+outdir=$(mktemp -d)
+
+for f in ${vfiles}; do
+    compdir=$(dirname $f)
+    component=$(basename ${compdir})
+    # This only works if you have helm2 and helm3 as
+    # separate binaries; nginx-ingress requires helm3 and everything else
+    # is helm2
+    apiver=$(grep apiVersion ${compdir}/Chart.yaml | \
+		 cut -d ':' -f 2 | tr -d ' ')
+    case ${apiver} in
+	"v1")
+	    helm=$(which helm2)
+	    ;;
+	"v2")
+	    helm=$(which helm3)
+	    ;;
+	*)
+	    echo 1>&2 "Unknown apiVersion '${apiver}'."
+	    exit 4
+	    ;;
+    esac
+    # Special-case logic to accomodate name hiccups
+    case ${component} in
+	"science-platform")
+	# Skip app-of-apps
+	    continue
+	    ;;
+	"argocd" | "nginx-ingress" | "vault-secrets-operator" | "cert-issuer")
+	    # No corresponding chart in "charts"; use the lsp-deploy one.
+	    chart_comp=$(dirname $f)
+	    ;;
+	*)
+	    chart_comp="${chartdir}/charts/${component}"
+	    # A few naming infelicities
+	    if [ "${component}" == "portal" ]; then
+		chart_comp="${chartdir}/charts/firefly"
+	    fi
+	    if [ "${component}" == "tap" ] || \
+		   [ "${component}" == "obstap" ]; then
+		# The chart name is the top-level map tag
+		chartname=$(head -1 ${f} | cut -d ':' -f 1)
+		chart_comp="${chartdir}/charts/${chartname}"
+	    fi
+	    ;;
+    esac
+
+    if [ ! -d ${chart_comp} ]; then
+	echo 1>&2 "No component ${component} found in charts."
+	exit 4
+    fi
+    cd ${chart_comp}
+    ${helm} repo update
+    ${helm} dependency update
+    ${helm} template -n ${environ} --output-dir ${outdir} -f ${f} .
+    cd ${cwd}
+done
+ymls=$(find ${outdir} -name \*.yml)
+cc=$(kubectl config current-context)
+if [ -z "${cc}" ]; then
+    echo 1>&2 "Cannot determine current kubectl context."
+    exit 5
+fi
+echo "Kubernetes context is: '${cc}'."
+for y in ${ymls}; do
+    kubectl apply -f ${y} --dry-run=server
+done
+echo "kubectl likes all the generated YAML."
+echo "Output yml is in ${outdir}"
+echo "Please clean it up when you are done."
+
