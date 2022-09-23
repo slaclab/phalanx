@@ -24,8 +24,6 @@ noteburst:
   enabled: false
 nublado2:
   enabled: false
-obstap:
-  enabled: false
 plot_navigator:
   enabled: false
 portal:
@@ -39,6 +37,8 @@ production_tools:
 semaphore:
   enabled: false
 sherlock:
+  enabled: false
+sqlproxy_cross_project:
   enabled: false
 squareone:
   enabled: false

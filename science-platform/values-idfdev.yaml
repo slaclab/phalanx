@@ -28,8 +28,6 @@ noteburst:
   enabled: true
 nublado2:
   enabled: true
-obstap:
-  enabled: false
 plot_navigator:
   enabled: false
 portal:
@@ -48,6 +46,8 @@ squareone:
   enabled: true
 squash_api:
   enabled: false
+sqlproxy_cross_project:
+  enabled: true
 strimzi:
   enabled: true
 strimzi_registry_operator:

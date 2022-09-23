@@ -17,7 +17,6 @@
 | narrativelog.enabled | bool | `false` |  |
 | noteburst.enabled | bool | `false` |  |
 | nublado2.enabled | bool | `false` |  |
-| obstap.enabled | bool | `false` |  |
 | onepassword_uuid | string | `"dg5afgiadsffeklfr6jykqymeu"` |  |
 | plot_navigator.enabled | bool | `false` |  |
 | portal.enabled | bool | `false` |  |
@@ -28,6 +27,7 @@
 | sasquatch.enabled | bool | `false` |  |
 | semaphore.enabled | bool | `false` |  |
 | sherlock.enabled | bool | `false` |  |
+| sqlproxy_cross_project.enabled | bool | `false` |  |
 | squareone.enabled | bool | `false` |  |
 | squash_api.enabled | bool | `false` |  |
 | strimzi.enabled | bool | `false` |  |

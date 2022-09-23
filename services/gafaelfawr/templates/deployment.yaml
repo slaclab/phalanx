@@ -58,7 +58,7 @@ spec:
               port: "http"
           {{- with .Values.resources }}
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           securityContext:
             allowPrivilegeEscalation: false
@@ -80,7 +80,7 @@ spec:
       volumes:
         - name: "config"
           configMap:
-            name: {{ template "gafaelfawr.fullname" . }}-config
+            name: {{ template "gafaelfawr.fullname" . }}-config-sidecar
         - name: "secret"
           secret:
             secretName: {{ template "gafaelfawr.fullname" . }}-secret

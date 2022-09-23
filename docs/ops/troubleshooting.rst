@@ -93,6 +93,36 @@ User pods don't spawn, reporting "permission denied" from Moneypenny
 **Symptoms:** A user pod fails to spawn, and the error message says that Moneypenny did not have permission to execute.
 
 **Cause:** The ``gafaelfawr-token`` VaultSecret in the ``nublado2`` namespace is out of date.
-This happened because the ``gafaelfawr-redis`` pod restarted and either it lacked persistent storage (at the T&S sites, as of October 2021), or because that storage had been lost.
+This happened because the ``gafaelfawr-redis`` pod restarted and either it lacked persistent storage (at the T&S sites, as of July 2022), or because that storage had been lost.
 
 **Solution:** :doc:`gafaelfawr/recreate-token`
+
+Login fails with "bad verification code" error
+==============================================
+
+**Symptoms:** When attempting to authenticate to a Science Platform deployment using GitHub, the user gets the error message ``Authentication provider failed: bad_verification_code: The code passed is incorrect or expired.``
+
+**Cause:** GitHub login failed after the OAuth 2.0 interaction with GitHub was successfully completed, and then the user reloaded the failed login page (or reloaded the page while Gafaelfawr was attempting to complete the authentication).
+Usually this happens because Gafaelfawr was unable to write to its storage, either Redis or PostgreSQL.
+If the storage underlying the deployment is broken, this can happen without producing obvious error messages, since the services can go into disk wait and just time out.
+Restarting the in-cluster ``postgresql`` pod, if PostgreSQL is running inside the Kubernetes deployment, will generally make this problem obvious because PostgreSQL will be unable to start.
+
+**Solution:** Check the underlying storage for Redis and Gafaelfawr.
+For in-cluster PostgreSQL, if this is happening for all users, try restarting the ``postgresql`` pod, which will not fix the problem but will make it obvious if it is indeed storage.
+If the problem is storage, this will need to be escalated to whoever runs the storage for that Gafaelfawr deployment.
+
+Note that reloading a failed login page from Gafaelfawr will never work and will always produce this error, so it can also be caused by user impatience.
+In that case, the solution is to just wait or to return to the front page and try logging in again, rather than reloading the page.
+
+User keeps logging in through the wrong identity provider
+=========================================================
+
+**Symptoms**: When attempting to use a different identity provider for authentication, such as when linking a different identity to the same account, the CILogon screen to select an identity provider doesn't appear.
+Instead, the user is automatically sent to the last identity provider they used.
+
+**Cause:** The CILogon identity provider selection screen supports remembering your selection, in which case it's stored in a browser cookie or local storage and you are not prompted again.
+Even when you want to be prompted.
+
+**Solution:** Have the user go to `https://cilogin.org/me <https://cilogon.org/me>`__ and choose "Delete ALL".
+This will clear their remembered selection.
+They can they retry whatever operation they were attempting.

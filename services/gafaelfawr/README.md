@@ -13,20 +13,27 @@ Science Platform authentication and authorization system
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Affinity rules for the Gafaelfawr frontend pod |
-| cloudsql.enabled | bool | `false` | Enable the Cloud SQL Auth Proxy sidecar, used with CloudSQL databases on Google Cloud |
+| cloudsql.affinity | object | `{}` | Affinity rules for the Cloud SQL Proxy pod |
+| cloudsql.enabled | bool | `false` | Enable the Cloud SQL Auth Proxy, used with CloudSQL databases on Google Cloud. This will be run as a sidecar for the main Gafaelfawr pods, and as a separate service (behind a `NetworkPolicy`) for other, lower-traffic services. |
 | cloudsql.image.pullPolicy | string | `"IfNotPresent"` | Pull policy for Cloud SQL Auth Proxy images |
 | cloudsql.image.repository | string | `"gcr.io/cloudsql-docker/gce-proxy"` | Cloud SQL Auth Proxy image to use |
-| cloudsql.image.tag | string | `"1.31.1"` | Cloud SQL Auth Proxy tag to use |
-| cloudsql.instanceConnectionName | string | `""` | Instance connection name for a CloudSQL PostgreSQL instance |
-| cloudsql.serviceAccount | string | `""` | The Google service account that has an IAM binding to the `gafaelfawr` and `gafaelfawr-tokens` Kubernetes service accounts and has the `cloudsql.client` role |
+| cloudsql.image.tag | string | `"1.32.0"` | Cloud SQL Auth Proxy tag to use |
+| cloudsql.instanceConnectionName | string | None, must be set if Cloud SQL Auth Proxy is enabled | Instance connection name for a CloudSQL PostgreSQL instance |
+| cloudsql.nodeSelector | object | `{}` | Node selection rules for the Cloud SQL Proxy pod |
+| cloudsql.podAnnotations | object | `{}` | Annotations for the Cloud SQL Proxy pod |
+| cloudsql.resources | object | `{}` | Resource limits and requests for the Cloud SQL Proxy pod |
+| cloudsql.serviceAccount | string | None, must be set if Cloud SQL Auth Proxy is enabled | The Google service account that has an IAM binding to the `gafaelfawr` Kubernetes service account and has the `cloudsql.client` role |
+| cloudsql.tolerations | list | `[]` | Tolerations for the Cloud SQL Proxy pod |
 | config.cilogon.clientId | string | `""` | CILogon client ID. One and only one of this, `config.github.clientId`, or `config.oidc.clientId` must be set. |
 | config.cilogon.enrollmentUrl | string | Login fails with an error | Where to send the user if their username cannot be found in LDAP |
+| config.cilogon.gidClaim | string | Do not set a primary GID | Claim from which to get the primary GID (only used if not retrieved from LDAP or Firestore) |
+| config.cilogon.groupsClaim | string | `"isMemberOf"` | Claim from which to get the group membership (only used if not retrieved from LDAP) |
 | config.cilogon.loginParams | object | `{"skin":"LSST"}` | Additional parameters to add |
 | config.cilogon.redirectUrl | string | `/login` at the value of config.host | Return URL given to CILogon (must match the CILogon configuration) |
 | config.cilogon.test | bool | `false` | Whether to use the test instance of CILogon |
 | config.cilogon.uidClaim | string | `"uidNumber"` | Claim from which to get the numeric UID (only used if not retrieved from LDAP or Firestore) |
 | config.cilogon.usernameClaim | string | `"uid"` | Claim from which to get the username |
-| config.databaseUrl | string | None, must be set | URL for the PostgreSQL database |
+| config.databaseUrl | string | None, must be set if `cloudsql.enabled` is not true | URL for the PostgreSQL database |
 | config.errorFooter | string | `""` | HTML footer to add to any login error page (inside a <p> tag). |
 | config.firestore.project | string | Firestore support is disabled | If set, assign UIDs and GIDs using Google Firestore in the given project.  Cloud SQL must be enabled and the Cloud SQL service account must have read/write access to that Firestore instance. |
 | config.github.clientId | string | `""` | GitHub client ID. One and only one of this, `config.cilogon.clientId`, or `config.oidc.clientId` must be set. |
@@ -35,7 +42,9 @@ Science Platform authentication and authorization system
 | config.influxdb.username | string | `""` | If set, force all InfluxDB tokens to have that username instead of the authenticated identity of the user requesting a token |
 | config.initialAdmins | list | `[]` | Usernames to add as administrators when initializing a new database. Used only if there are no administrators. |
 | config.knownScopes | object | See the `values.yaml` file | Names and descriptions of all scopes in use. This is used to populate the new token creation page. Only scopes listed here will be options when creating a new token. See [DMTN-235](https://dmtn-235.lsst.io/). |
+| config.ldap.addUserGroup | bool | `false` | Whether to synthesize a user private group for each user with a GID equal to their UID |
 | config.ldap.emailAttr | string | `"mail"` | Attribute containing the user's email address |
+| config.ldap.gidAttr | string | Use GID of user private group | Attribute containing the user's primary GID (set to `gidNumber` for most LDAP servers) |
 | config.ldap.groupBaseDn | string | None, must be set | Base DN for the LDAP search to find a user's groups |
 | config.ldap.groupMemberAttr | string | `"member"` | Member attribute of the object class. Values must match the username returned in the token from the OpenID Connect authentication server. |
 | config.ldap.groupObjectClass | string | `"posixGroup"` | Object class containing group information |
@@ -49,6 +58,8 @@ Science Platform authentication and authorization system
 | config.oidc.audience | string | Value of `config.oidc.clientId` | Audience for the JWT token |
 | config.oidc.clientId | string | `""` | Client ID for generic OpenID Connect support. One and only one of this, `config.cilogon.clientId`, or `config.github.clientId` must be set. |
 | config.oidc.enrollmentUrl | string | Login fails with an error | Where to send the user if their username cannot be found in LDAP |
+| config.oidc.gidClaim | string | Do not set a primary GID | Claim from which to get the primary GID (only used if not retrieved from LDAP or Firestore) |
+| config.oidc.groupsClaim | string | `"isMemberOf"` | Claim from which to get the group membership (only used if not retrieved from LDAP) |
 | config.oidc.issuer | string | None, must be set | Issuer for the JWT token |
 | config.oidc.loginParams | object | `{}` | Additional parameters to add to the login request |
 | config.oidc.loginUrl | string | None, must be set | URL to which to redirect the user for authorization |
@@ -58,6 +69,7 @@ Science Platform authentication and authorization system
 | config.oidc.usernameClaim | string | `"sub"` | Claim from which to get the username |
 | config.oidcServer.enabled | bool | `false` | Whether to support OpenID Connect clients. If set to true, `oidc-server-secrets` must be set in the Gafaelfawr secret. |
 | config.proxies | list | [`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`] | List of netblocks used for internal Kubernetes IP addresses, used to determine the true client IP for logging |
+| config.slackAlerts | bool | `false` | Whether to send certain serious alerts to Slack. If `true`, the `slack-webhook` secret must also be set. |
 | config.tokenLifetimeMinutes | int | `43200` (30 days) | Session length and token expiration (in minutes) |
 | fullnameOverride | string | `""` | Override the full name for resources (includes the release name) |
 | global.baseUrl | string | Set by Argo CD | Base URL for the environment |
@@ -66,13 +78,20 @@ Science Platform authentication and authorization system
 | image.pullPolicy | string | `"IfNotPresent"` | Pull policy for the Gafaelfawr image |
 | image.repository | string | `"ghcr.io/lsst-sqre/gafaelfawr"` | Gafaelfawr image to use |
 | image.tag | string | The appVersion of the chart | Tag of Gafaelfawr image to use |
+| maintenance.affinity | object | `{}` | Affinity rules for Gafaelfawr maintenance and audit pods |
+| maintenance.auditSchedule | string | `"30 3 * * *"` | Cron schedule string for Gafaelfawr data consistency audit (in UTC) |
+| maintenance.maintenanceSchedule | string | `"5 * * * *"` | Cron schedule string for Gafaelfawr periodic maintenance (in UTC) |
+| maintenance.nodeSelector | object | `{}` | Node selection rules for Gafaelfawr maintenance and audit pods |
+| maintenance.podAnnotations | object | `{}` | Annotations for Gafaelfawr maintenance and audit pods |
+| maintenance.resources | object | `{}` | Resource limits and requests for Gafaelfawr maintenance and audit pods |
+| maintenance.tolerations | list | `[]` | Tolerations for Gafaelfawr maintenance and audit pods |
 | nameOverride | string | `""` | Override the base name for resources |
 | nodeSelector | object | `{}` | Node selector rules for the Gafaelfawr frontend pod |
 | podAnnotations | object | `{}` | Annotations for the Gafaelfawr frontend pod |
 | redis.affinity | object | `{}` | Affinity rules for the Redis pod |
 | redis.image.pullPolicy | string | `"IfNotPresent"` | Pull policy for the Redis image |
 | redis.image.repository | string | `"redis"` | Redis image to use |
-| redis.image.tag | string | `"7.0.3"` | Redis image tag to use |
+| redis.image.tag | string | `"7.0.4"` | Redis image tag to use |
 | redis.nodeSelector | object | `{}` | Node selection rules for the Redis pod |
 | redis.persistence.accessMode | string | `"ReadWriteOnce"` | Access mode of storage to request |
 | redis.persistence.enabled | bool | `true` | Whether to persist Redis storage and thus tokens. Setting this to false will use `emptyDir` and reset all tokens on every restart. Only use this for a test deployment. |

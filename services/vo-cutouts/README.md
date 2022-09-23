@@ -14,7 +14,7 @@ Image cutout service complying with IVOA SODA
 | cloudsql.enabled | bool | `false` | Enable the Cloud SQL Auth Proxy sidecar, used with CloudSQL databases on Google Cloud |
 | cloudsql.image.pullPolicy | string | `"IfNotPresent"` | Pull policy for Cloud SQL Auth Proxy images |
 | cloudsql.image.repository | string | `"gcr.io/cloudsql-docker/gce-proxy"` | Cloud SQL Auth Proxy image to use |
-| cloudsql.image.tag | string | `"1.31.1"` | Cloud SQL Auth Proxy tag to use |
+| cloudsql.image.tag | string | `"1.32.0"` | Cloud SQL Auth Proxy tag to use |
 | cloudsql.instanceConnectionName | string | `""` | Instance connection name for a CloudSQL PostgreSQL instance |
 | cloudsql.serviceAccount | string | None, must be set | The Google service account that has an IAM binding to the `vo-cutouts` Kubernetes service accounts and has the `cloudsql.client` role, access to the GCS bucket, and ability to sign URLs as itself |
 | config.databaseUrl | string | None, must be set | URL for the PostgreSQL database |
@@ -54,7 +54,7 @@ Image cutout service complying with IVOA SODA
 | redis.affinity | object | `{}` | Affinity rules for the Redis pod |
 | redis.image.pullPolicy | string | `"IfNotPresent"` | Pull policy for the Redis image |
 | redis.image.repository | string | `"redis"` | Redis image to use |
-| redis.image.tag | string | `"7.0.3"` | Redis image tag to use |
+| redis.image.tag | string | `"7.0.4"` | Redis image tag to use |
 | redis.nodeSelector | object | `{}` | Node selection rules for the Redis pod |
 | redis.persistence.accessMode | string | `"ReadWriteOnce"` | Access mode of storage to request |
 | redis.persistence.enabled | bool | `true` | Whether to persist Redis storage and thus tokens. Setting this to false will use `emptyDir` and reset all tokens on every restart. Only use this for a test deployment. |

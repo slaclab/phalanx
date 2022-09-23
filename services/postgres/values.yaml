@@ -22,25 +22,16 @@ postgresVolumeSize: "1Gi"
 # -- Storage class for postgres volume.  Set to appropriate value for your
 # deployment: at GKE, "standard" (if you want SSD, "premium-rwo", but if you
 # want a good database maybe it's better to use a cloud database?), on Rubin
-# Observatory Rancher, "rook-ceph-block", at NCSA, "manual", elsewhere
-# probably "standard"
+# Observatory Rancher, "rook-ceph-block", elsewhere probably "standard"
 postgresStorageClass: "standard"
 
 # -- Volume name for postgres, if you use an existing volume that isn't
-# automatically created from the PVC by the storage driver (e.g. NCSA)
+# automatically created from the PVC by the storage driver.
 volumeName: ""
 
 # The following will be set by parameters injected by Argo CD and should not
 # be set in the individual environment values files.
 global:
-  # -- Base URL for the environment
-  # @default -- Set by Argo CD
-  baseUrl: ""
-
-  # -- Host name for ingress
-  # @default -- Set by Argo CD
-  host: ""
-
   # -- Base path for Vault secrets
   # @default -- Set by Argo CD
   vaultSecretsPath: ""

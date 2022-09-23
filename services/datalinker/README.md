@@ -1,6 +1,6 @@
 # datalinker
 
-IVOA DataLink service for Rubin Science Platform
+Service and data discovery for Rubin Science Platform
 
 ## Source Code
 
@@ -15,6 +15,7 @@ IVOA DataLink service for Rubin Science Platform
 | autoscaling.maxReplicas | int | `100` | Maximum number of datalinker deployment pods |
 | autoscaling.minReplicas | int | `1` | Minimum number of datalinker deployment pods |
 | autoscaling.targetCPUUtilizationPercentage | int | `80` | Target CPU utilization of datalinker deployment pods |
+| config.tapMetadataUrl | string | `"https://github.com/lsst/sdm_schemas/releases/download/1.2.0/datalink-columns.zip"` | URL containing TAP schema metadata used to construct queries |
 | fullnameOverride | string | `""` | Override the full name for resources (includes the release name) |
 | global.baseUrl | string | Set by Argo CD | Base URL for the environment |
 | global.butlerRepositoryIndex | string | Set by Argo CD | URI to the Butler configuration of available repositories |
@@ -25,7 +26,6 @@ IVOA DataLink service for Rubin Science Platform
 | image.tag | string | `""` | Overrides the image tag whose default is the chart appVersion. |
 | ingress.annotations | object | `{}` | Additional annotations for the ingress rule |
 | ingress.gafaelfawrAuthQuery | string | `"scope=read:image"` | Gafaelfawr auth query string |
-| ingress.path | string | `"/api/datalink"` | URL path to dispatch to the datalinker deployment pod |
 | nameOverride | string | `""` | Override the base name for resources |
 | nodeSelector | object | `{}` | Node selection rules for the datalinker deployment pod |
 | podAnnotations | object | `{}` | Annotations for the datalinker deployment pod |
