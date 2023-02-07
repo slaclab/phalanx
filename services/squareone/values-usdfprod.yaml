@@ -1,8 +1,0 @@
-replicaCount: 3
-config:
-  siteName: "Rubin Science Platform"
-  semaphoreUrl: "https://usdf-rsp.slac.stanford.edu/semaphore"
-
-pull-secret:
-  enabled: true
-  path: secret/rubin/usdf-rsp/pull-secret
