@@ -1,4 +1,38 @@
-strimzi-kafka: {}
+strimzi-kafka:
+  kafka:
+    externalListener:
+      bootstrap:
+        annotations:
+          metallb.universe.tf/address-pool: sdf-services
+      brokers:
+#        - host: "sasquatch-kafka-0"
+#          annotations:
+#            metallb.universe.tf/address-pool: "sdf-services"
+#        - host: "sasquatch-kafka-1"
+#          annotations:
+#            metallb.universe.tf/address-pool: "sdf-services"
+#        - host: "sasquatch-kafka-2"
+#          annotations:
+#            metallb.universe.tf/address-pool: "sdf-services"
+#        - host: "sasquatch-kafka-bootstrap"
+#          annotations:
+#            metallb.universe.tf/address-pool: "sdf-services"
+#        - host: "sasquatch-kafka-external-bootstrap"
+#          annotations:
+#            metallb.universe.tf/address-pool: "sdf-services"
+
+  mirrormaker2:
+    enabled: true
+    source:
+      bootstrapServer: sasquatch-tts-kafka-bootstrap.lsst.codes:9094
+      topicsPattern: "registry-schemas, lsst.sal.*, lsst.dm.*"
+    resources:
+      requests:
+        cpu: 2
+        memory: 4Gi
+      limits:
+        cpu: 4
+        memory: 8Gi
 
 influxdb:
   ingress:
