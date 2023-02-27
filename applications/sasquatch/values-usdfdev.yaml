@@ -5,21 +5,21 @@ strimzi-kafka:
         annotations:
           metallb.universe.tf/address-pool: "sdf-services"
       brokers:
-        - host: "sasquatch-kafka-0"
-          annotations:
-            metallb.universe.tf/address-pool: "sdf-services"
-        - host: "sasquatch-kafka-1"
-          annotations:
-            metallb.universe.tf/address-pool: "sdf-services"
-        - host: "sasquatch-kafka-2"
-          annotations:
-            metallb.universe.tf/address-pool: "sdf-services"
-        - host: "sasquatch-kafka-bootstrap"
-          annotations:
-            metallb.universe.tf/address-pool: "sdf-services"
-        - host: "sasquatch-kafka-external-bootstrap"
-          annotations:
-            metallb.universe.tf/address-pool: "sdf-services"
+#        - host: "sasquatch-kafka-0"
+#          annotations:
+#            metallb.universe.tf/address-pool: "sdf-services"
+#        - host: "sasquatch-kafka-1"
+#          annotations:
+#            metallb.universe.tf/address-pool: "sdf-services"
+#        - host: "sasquatch-kafka-2"
+#          annotations:
+#            metallb.universe.tf/address-pool: "sdf-services"
+#        - host: "sasquatch-kafka-bootstrap"
+#          annotations:
+#            metallb.universe.tf/address-pool: "sdf-services"
+#        - host: "sasquatch-kafka-external-bootstrap"
+#          annotations:
+#            metallb.universe.tf/address-pool: "sdf-services"
 
   mirrormaker2:
     enabled: true
