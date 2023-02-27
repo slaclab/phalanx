@@ -3,7 +3,7 @@ strimzi-kafka:
     externalListener:
       bootstrap:
         annotations:
-          metallb.universe.tf/address-pool: "sdf-services"
+          metallb.universe.tf/address-pool: sdf-services
       brokers:
 #        - host: "sasquatch-kafka-0"
 #          annotations:
