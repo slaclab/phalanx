@@ -17,7 +17,7 @@ Authentication and identity system
 | cloudsql.enabled | bool | `false` | Enable the Cloud SQL Auth Proxy, used with CloudSQL databases on Google Cloud. This will be run as a sidecar for the main Gafaelfawr pods, and as a separate service (behind a `NetworkPolicy`) for other, lower-traffic services. |
 | cloudsql.image.pullPolicy | string | `"IfNotPresent"` | Pull policy for Cloud SQL Auth Proxy images |
 | cloudsql.image.repository | string | `"gcr.io/cloudsql-docker/gce-proxy"` | Cloud SQL Auth Proxy image to use |
-| cloudsql.image.tag | string | `"1.33.2"` | Cloud SQL Auth Proxy tag to use |
+| cloudsql.image.tag | string | `"1.33.4"` | Cloud SQL Auth Proxy tag to use |
 | cloudsql.instanceConnectionName | string | None, must be set if Cloud SQL Auth Proxy is enabled | Instance connection name for a CloudSQL PostgreSQL instance |
 | cloudsql.nodeSelector | object | `{}` | Node selection rules for the Cloud SQL Proxy pod |
 | cloudsql.podAnnotations | object | `{}` | Annotations for the Cloud SQL Proxy pod |
@@ -91,9 +91,8 @@ Authentication and identity system
 | operator.tolerations | list | `[]` | Tolerations for the token management pod |
 | podAnnotations | object | `{}` | Annotations for the Gafaelfawr frontend pod |
 | redis.affinity | object | `{}` | Affinity rules for the Redis pod |
-| redis.image.pullPolicy | string | `"IfNotPresent"` | Pull policy for the Redis image |
-| redis.image.repository | string | `"redis"` | Redis image to use |
-| redis.image.tag | string | `"7.0.8"` | Redis image tag to use |
+| redis.config.secretKey | string | `"redis-password"` | Key inside secret from which to get the Redis password (do not change) |
+| redis.config.secretName | string | `"gafaelfawr-secret"` | Name of secret containing Redis password (may require changing if fullnameOverride is set) |
 | redis.nodeSelector | object | `{}` | Node selection rules for the Redis pod |
 | redis.persistence.accessMode | string | `"ReadWriteOnce"` | Access mode of storage to request |
 | redis.persistence.enabled | bool | `true` | Whether to persist Redis storage and thus tokens. Setting this to false will use `emptyDir` and reset all tokens on every restart. Only use this for a test deployment. |
@@ -101,6 +100,7 @@ Authentication and identity system
 | redis.persistence.storageClass | string | `""` | Class of storage to request |
 | redis.persistence.volumeClaimName | string | `""` | Use an existing PVC, not dynamic provisioning. If this is set, the size, storageClass, and accessMode settings are ignored. |
 | redis.podAnnotations | object | `{}` | Pod annotations for the Redis pod |
+| redis.resources | object | See `values.yaml` | Resource limits and requests for the Redis pod |
 | redis.tolerations | list | `[]` | Tolerations for the Redis pod |
 | replicaCount | int | `1` | Number of web frontend pods to start |
 | resources | object | `{}` | Resource limits and requests for the Gafaelfawr frontend pod |
