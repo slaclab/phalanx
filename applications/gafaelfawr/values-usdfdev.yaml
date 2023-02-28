@@ -36,7 +36,6 @@ config:
     gidAttr: gidNumber
     nameAttr: gecos
 
-
   groupMapping:
     "admin:token":
     - "rubinmgr"
