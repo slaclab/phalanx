@@ -3,6 +3,7 @@
 ENVIRONMENT=${1:?"Usage: read_secrets.sh ENVIRONMENT"}
 
 mkdir -p secrets
+
 COMPONENTS=`vault kv list --format=yaml secret/k8s_operator/$ENVIRONMENT | yq -r '.[]'`
 for SECRET in $COMPONENTS
 do
