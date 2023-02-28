@@ -106,7 +106,6 @@ class SecretGenerator:
         prompt_string = "New filename with contents (empty to not change): "
         fname = input(prompt_string)
 
-        print(f"{self.secrets[component]}")
         if fname:
             with open(fname, "r") as f:
                 self.secrets[component][name] = f.read()
